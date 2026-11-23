@@ -1,0 +1,71 @@
+﻿# Dependencies and package manager caches (all directories)
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/install-state.gz
+.pnp.*
+
+# Build, coverage, test reports, and tool caches
+dist/
+dist-ssr/
+build/
+coverage/
+.test-dist/
+.vite/
+.cache/
+.turbo/
+.eslintcache
+*.tsbuildinfo
+playwright-report/
+test-results/
+
+# Local configuration and secrets; keep documented examples trackable
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.local
+*.pem
+*.key
+*.p12
+*.pfx
+.aws/
+.ssh/
+
+# Logs and crash output
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Local databases, backups, and temporary files
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.dump
+*.bak
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Editors and operating systems
+.vscode/
+.idea/
+.vs/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.suo
+*.ntvs*
+*.njsproj
+
+# Keep source tests, SQL migrations, package-lock.json, and .env.example tracked.
+tests

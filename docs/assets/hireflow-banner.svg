@@ -1,0 +1,10 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+<title id="title">HireFlow by ARQYON Tech</title><desc id="desc">Professional people. Meaningful opportunities. One connected hiring experience.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0a1128"/><stop offset="1" stop-color="#123d4d"/></linearGradient><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#7de0e5" stroke-opacity=".07"/></pattern><linearGradient id="accent"><stop stop-color="#8ef1ed"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+<rect width="1200" height="360" rx="20" fill="url(#bg)"/><rect width="1200" height="360" rx="20" fill="url(#grid)"/>
+<g fill="none" stroke="#67dce3" stroke-opacity=".2"><circle cx="1000" cy="180" r="110"/><circle cx="1000" cy="180" r="155"/><path d="M850 90L1000 180L1110 260M1000 180L1100 65"/></g>
+<g fill="#76e3e6"><circle cx="850" cy="90" r="7"/><circle cx="1110" cy="260" r="7"/><circle cx="1100" cy="65" r="7"/></g>
+<rect x="945" y="125" width="110" height="110" rx="25" fill="#16394c" stroke="#69d4dd"/>
+<text x="1000" y="203" text-anchor="middle" fill="#93eeee" font-family="Segoe UI,Arial,sans-serif" font-size="68" font-weight="700">h</text>
+<g font-family="Segoe UI,Arial,sans-serif"><text x="65" y="72" fill="#b6d5df" font-size="14" letter-spacing="4">ARQYON TECH / PROFESSIONAL HIRING</text><text x="60" y="169" fill="#ffffff" font-size="80" font-weight="700" letter-spacing="-3">HireFlow<tspan fill="#75e5e6">.</tspan></text><text x="65" y="218" fill="#d4e5ec" font-size="24">People. Potential. Possibility.</text><text x="65" y="255" fill="#a5c4d0" font-size="17">Build your profile. Discover opportunities. Find your next hire.</text><rect x="65" y="290" width="305" height="3" rx="1.5" fill="url(#accent)"/></g>
+</svg>

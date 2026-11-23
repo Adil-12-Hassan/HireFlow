@@ -1,0 +1,7 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="92" viewBox="0 0 1200 92" role="img" aria-labelledby="title">
+<title id="title">Built with React, TypeScript, Express, PostgreSQL and Supabase</title>
+<rect width="1200" height="92" rx="14" fill="#102737"/>
+<g font-family="Segoe UI,Arial,sans-serif" font-size="18" fill="#eefaff" text-anchor="middle"><text x="120" y="53">React 19</text><text x="360" y="53">TypeScript</text><text x="600" y="53">Express 5</text><text x="840" y="53">PostgreSQL</text><text x="1080" y="53">Supabase</text></g>
+<g stroke="#426270"><path d="M240 25V67M480 25V67M720 25V67M960 25V67"/></g>
+<g fill="#69dce1"><circle cx="120" cy="73" r="2"/><circle cx="360" cy="73" r="2"/><circle cx="600" cy="73" r="2"/><circle cx="840" cy="73" r="2"/><circle cx="1080" cy="73" r="2"/></g>
+</svg>
