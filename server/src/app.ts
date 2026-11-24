@@ -1,5 +1,5 @@
-import express from "express";
-import helmet from "helmet";
+import express, { type RequestHandler } from "express";
+import helmetImport, { type HelmetOptions } from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
@@ -9,6 +9,13 @@ import { originCheck } from "./middleware/originCheck.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { apiRouter } from "./routes/index.js";
 import { notFound } from "./utils/errors.js";
+
+// Helmet ships separate ESM/CJS typings. Depending on how the toolchain resolves
+// the package (local tsc vs Vercel's builder), the default import can be either
+// the function itself or a namespace object holding it as `.default`.
+// Normalise both shapes so `helmet()` is always callable.
+const helmet = ((helmetImport as unknown as { default?: unknown }).default ??
+    helmetImport) as (options?: Readonly<HelmetOptions>) => RequestHandler;
 
 export function createApp() {
     const app = express();
