@@ -24,8 +24,6 @@ test-results/
 # Local configuration and secrets; keep documented examples trackable
 .env
 .env.*
-!.env.example
-!.env.*.example
 *.local
 *.pem
 *.key
@@ -61,7 +59,6 @@ lerna-debug.log*
 .idea/
 .vs/
 .DS_Store
-Thumbs.db
 Desktop.ini
 *.suo
 *.ntvs*
