@@ -1,4 +1,4 @@
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 import type { Request, Response } from "express";
 
 // All limiters reply with the same error shape as the rest of the API:
