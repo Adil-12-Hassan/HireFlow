@@ -1,4 +1,5 @@
 import type { CookieOptions, Request, Response } from "express";
+import { env } from "../config/env.js";
 
 export const ACCESS_COOKIE = "hireflow_access";
 export const REFRESH_COOKIE = "hireflow_refresh";
@@ -7,12 +8,13 @@ export const REFRESH_COOKIE = "hireflow_refresh";
 const ACCESS_MAX_AGE_MS = 15 * 60 * 1000;
 const REFRESH_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
-// Cookie flags follow the connection, not NODE_ENV. Over HTTPS (also behind a
-// proxy, trust proxy is on) the cookie is Secure and SameSite=None, so a frontend
-// on another domain can use the API. Over plain http (local development) it is
-// Lax, because browsers reject SameSite=None without Secure.
+// Cookies are always HttpOnly. They are Secure + SameSite=None (so a frontend on
+// another domain can use the API) when NODE_ENV is production OR the connection is
+// HTTPS (also behind a proxy, trust proxy is on). Production can never send a
+// cookie without Secure. Only a local http://localhost setup gets Lax, because
+// browsers reject SameSite=None without Secure.
 function baseOptions(res: Response, path: string): CookieOptions {
-    const secure = res.req.secure;
+    const secure = env.NODE_ENV === "production" || res.req.secure;
     return {
         httpOnly: true,
         secure,
