@@ -26,6 +26,15 @@ jobRouter.get(
     asyncHandler(jobController.listJobs),
 );
 
+// GET /jobs/mine -> 200, signed in only, my own jobs in every status
+// This must come before GET /:id, or "mine" would be treated as an id.
+jobRouter.get(
+    "/mine",
+    requireAuth,
+    validate({ query: paginationQuerySchema }),
+    asyncHandler(jobController.listMyJobs),
+);
+
 // GET /jobs/:id -> 200, public if open, owner only if draft or closed
 jobRouter.get(
     "/:id",

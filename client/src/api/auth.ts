@@ -1,14 +1,12 @@
 import { api } from "./client";
 
+// What GET /auth/me returns. Full profile fields come from GET /profiles/me.
 export type Me = {
     id: string;
+    email?: string;
     full_name: string;
     headline: string | null;
-    about: string | null;
     location: string | null;
-    contact: string | null;
-    created_at: string;
-    updated_at: string;
 };
 
 export async function register(data: { full_name: string; email: string; password: string }) {

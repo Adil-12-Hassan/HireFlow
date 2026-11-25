@@ -28,7 +28,7 @@ export default function Discovery() {
                 <input
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    placeholder="Search by name, headline, or skill"
+                    placeholder="Search by name or headline"
                     className="w-full rounded border px-3 py-2"
                 />
                 <ActionButton busy={isFetching} type="submit" className="rounded bg-blue-600 px-4 py-2 text-white">

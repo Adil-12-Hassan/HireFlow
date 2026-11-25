@@ -8,6 +8,6 @@ const app = createApp();
 
 app.listen(env.PORT, () => {
     console.log(`HireFlow API running on http://localhost:${env.PORT}`);
-    console.log(`Frontend allowed: ${env.FRONTEND_URL}`);
+    console.log(`Frontend allowed: ${env.ALLOWED_ORIGINS.join(", ")}`);
     console.log(`Environment: ${env.NODE_ENV}`);
 });

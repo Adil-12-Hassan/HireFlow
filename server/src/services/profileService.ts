@@ -1,6 +1,7 @@
 import { supabaseAdmin } from "../config/supabase.js";
 import { badRequest, forbidden, internalError, notFound } from "../utils/errors.js";
 import { paginationMeta, supabaseRange } from "../utils/pagination.js";
+import { ilikeOr } from "../utils/search.js";
 import {
     canViewSection,
     filterProfileForViewer,
@@ -111,9 +112,9 @@ export async function listProfiles(
         .order("id", { ascending: false })
         .range(from, to);
 
-    if (search) {
-        const term = search.replace(/[%_]/g, "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-        builder = builder.or(`full_name.ilike."%${term}%",headline.ilike."%${term}%"`);
+    const filter = search ? ilikeOr(["full_name", "headline"], search) : null;
+    if (filter) {
+        builder = builder.or(filter);
     }
 
     const { data, error, count } = await builder;

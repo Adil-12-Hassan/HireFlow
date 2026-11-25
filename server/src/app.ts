@@ -9,6 +9,7 @@ import { originCheck } from "./middleware/originCheck.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { apiRouter } from "./routes/index.js";
 import { notFound } from "./utils/errors.js";
+import { isAllowedOrigin } from "./utils/origins.js";
 
 // Helmet ships separate ESM/CJS typings. Depending on how the toolchain resolves
 // the package (local tsc vs Vercel's builder), the default import can be either
@@ -33,7 +34,10 @@ export function createApp() {
     // 3. CORS: only our frontend, and cookies are allowed.
     app.use(
         cors({
-            origin: env.FRONTEND_URL,
+            // No Origin header means a non-browser client (mobile app, curl): allow it.
+            origin: (origin, callback) => {
+                callback(null, !origin || isAllowedOrigin(origin, env.ALLOWED_ORIGINS));
+            },
             credentials: true,
         }),
     );

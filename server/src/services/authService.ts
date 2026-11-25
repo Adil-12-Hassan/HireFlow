@@ -102,6 +102,10 @@ export async function refreshSession(refreshToken: string): Promise<AuthTokens> 
 }
 
 // GET /auth/me
+// If the database trigger did not create the profile row for this account
+// (for example an account made before the trigger existed), we create it here.
+// Without this, a correct login would end in "Profile not found" and the user
+// would look signed out.
 export async function getMe(userId: string, email?: string): Promise<{
     id: string;
     email?: string;
@@ -109,14 +113,34 @@ export async function getMe(userId: string, email?: string): Promise<{
     headline: string | null;
     location: string | null;
 }> {
-    const { data, error } = await supabaseAdmin
-        .from("profiles")
-        .select("id, full_name, headline, location")
-        .eq("id", userId)
-        .single();
+    const fields = "id, full_name, headline, location";
 
-    if (error || !data) {
-        throw notFound("Profile not found");
+    const first = await supabaseAdmin.from("profiles").select(fields).eq("id", userId).maybeSingle();
+    if (first.error) {
+        throw internalError("Could not load profile");
+    }
+    let data = first.data;
+
+    if (!data) {
+        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.getUserById(userId);
+        if (authError || !authData.user) {
+            throw notFound("Profile not found");
+        }
+        const meta = authData.user.user_metadata as { full_name?: unknown } | null;
+        const metaName = typeof meta?.full_name === "string" ? meta.full_name.trim() : "";
+        const fullName = (metaName || (email ?? authData.user.email ?? "").split("@")[0] || "Member").slice(0, 100);
+
+        const { error: createError } = await supabaseAdmin
+            .from("profiles")
+            .upsert({ id: userId, full_name: fullName }, { onConflict: "id", ignoreDuplicates: true });
+        if (createError) {
+            throw internalError("Could not create profile");
+        }
+        const second = await supabaseAdmin.from("profiles").select(fields).eq("id", userId).maybeSingle();
+        if (second.error || !second.data) {
+            throw notFound("Profile not found");
+        }
+        data = second.data;
     }
 
     return {

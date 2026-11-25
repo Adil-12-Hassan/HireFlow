@@ -1,38 +1,60 @@
 import type { Request, Response } from "express";
 import * as authService from "../services/authService.js";
-import { clearAuthCookies, getAccessToken, getRefreshToken, setAuthCookies } from "../utils/cookies.js";
+import {
+    clearAuthCookies,
+    getAccessToken,
+    getRefreshToken,
+    isTokenClient,
+    setAuthCookies,
+} from "../utils/cookies.js";
 import { badRequest, unauthorized } from "../utils/errors.js";
+
+// Browsers get HttpOnly cookies. Mobile clients (X-Client-Type: mobile) get the
+// tokens in the JSON body instead, and no cookies are set for them.
+function sessionBody(
+    req: Request,
+    res: Response,
+    tokens: { accessToken?: string | undefined; refreshToken?: string | undefined } | null,
+): { accessToken?: string; refreshToken?: string } {
+    if (!tokens?.accessToken || !tokens.refreshToken) {
+        return {};
+    }
+    if (isTokenClient(req)) {
+        return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+    }
+    setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
+    return {};
+}
 
 // POST /auth/register -> 201
 export async function register(req: Request, res: Response): Promise<void> {
     const result = await authService.register(req.body);
-    if (result.accessToken && result.refreshToken) {
-        setAuthCookies(res, result.accessToken, result.refreshToken);
-    }
+    const session = sessionBody(req, res, result);
     res.status(201).json({
         id: result.id,
         email: result.email,
         needsVerification: result.needsVerification ?? false,
+        ...session,
     });
 }
 
 // POST /auth/login -> 200
 export async function login(req: Request, res: Response): Promise<void> {
     const result = await authService.login(req.body);
-    setAuthCookies(res, result.accessToken, result.refreshToken);
-    res.status(200).json({ id: result.id, email: result.email });
+    const session = sessionBody(req, res, result);
+    res.status(200).json({ id: result.id, email: result.email, ...session });
 }
 
 // POST /auth/refresh -> 200
-// Accepts only the HttpOnly refresh cookie.
+// Browsers: the HttpOnly refresh cookie. Mobile: { "refreshToken": "..." } in the body.
 export async function refresh(req: Request, res: Response): Promise<void> {
     const refreshToken = getRefreshToken(req);
     if (!refreshToken) {
         throw unauthorized("Session has expired, please sign in again");
     }
     const tokens = await authService.refreshSession(refreshToken);
-    setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
-    res.status(200).json({ ok: true });
+    const session = sessionBody(req, res, tokens);
+    res.status(200).json({ ok: true, ...session });
 }
 
 // POST /auth/logout -> 204, no body
@@ -83,8 +105,6 @@ export async function verifyEmail(req: Request, res: Response): Promise<void> {
         throw badRequest("Missing verification token");
     }
     const tokens = await authService.verifyEmail(tokenHash);
-    if (tokens) {
-        setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
-    }
-    res.status(200).json({ verified: true });
+    const session = sessionBody(req, res, tokens);
+    res.status(200).json({ verified: true, ...session });
 }
