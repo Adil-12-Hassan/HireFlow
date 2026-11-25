@@ -8,36 +8,42 @@ export const REFRESH_COOKIE = "hireflow_refresh";
 const ACCESS_MAX_AGE_MS = 15 * 60 * 1000;
 const REFRESH_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
-function baseOptions(path: string): CookieOptions {
+// Cookies are always HttpOnly. They are Secure + SameSite=None (so a frontend on
+// another domain can use the API) when NODE_ENV is production OR the connection is
+// HTTPS (also behind a proxy, trust proxy is on). Production can never send a
+// cookie without Secure. Only a local http://localhost setup gets Lax, because
+// browsers reject SameSite=None without Secure.
+function baseOptions(res: Response, path: string): CookieOptions {
+    const secure = env.NODE_ENV === "production" || res.req.secure;
     return {
         httpOnly: true,
-        secure: env.NODE_ENV === "production",
-        sameSite: env.NODE_ENV === "production" ? "none" : "lax",
+        secure,
+        sameSite: secure ? "none" : "lax",
         path,
     };
 }
 
 export function setAuthCookies(res: Response, accessToken: string, refreshToken: string): void {
     res.cookie(ACCESS_COOKIE, accessToken, {
-        ...baseOptions("/"),
+        ...baseOptions(res, "/"),
         maxAge: ACCESS_MAX_AGE_MS,
     });
     // The refresh cookie uses path "/" so it still reaches /auth/refresh when the
     // frontend proxies the API under another prefix, for example /api/auth/refresh.
     res.cookie(REFRESH_COOKIE, refreshToken, {
-        ...baseOptions("/"),
+        ...baseOptions(res, "/"),
         maxAge: REFRESH_MAX_AGE_MS,
     });
     // Remove the old refresh cookie that was scoped to /auth, so a browser
     // never sends two refresh cookies at once.
-    res.clearCookie(REFRESH_COOKIE, baseOptions("/auth"));
+    res.clearCookie(REFRESH_COOKIE, baseOptions(res, "/auth"));
 }
 
 export function clearAuthCookies(res: Response): void {
     // Clear must use the same path as set, or the browser will not delete the cookie.
-    res.clearCookie(ACCESS_COOKIE, baseOptions("/"));
-    res.clearCookie(REFRESH_COOKIE, baseOptions("/"));
-    res.clearCookie(REFRESH_COOKIE, baseOptions("/auth"));
+    res.clearCookie(ACCESS_COOKIE, baseOptions(res, "/"));
+    res.clearCookie(REFRESH_COOKIE, baseOptions(res, "/"));
+    res.clearCookie(REFRESH_COOKIE, baseOptions(res, "/auth"));
 }
 
 // Mobile apps (Android, iOS) send "X-Client-Type: mobile". They get the tokens

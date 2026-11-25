@@ -79,6 +79,11 @@ export class SessionError extends Error {
     }
 }
 
+// True when the server answered 401, meaning "not signed in".
+export function isUnauthorizedError(error: unknown): boolean {
+    return axios.isAxiosError(error) && error.response?.status === 401;
+}
+
 export function getErrorMessage(error: unknown): string {
     if (error instanceof SessionError) return error.message;
     if (axios.isAxiosError(error)) {
