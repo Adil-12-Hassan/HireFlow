@@ -67,3 +67,9 @@ export function createApp() {
 
     return app;
 }
+
+// Vercel (and other serverless hosts) look for an entry file such as src/app.ts
+// and need it to default-export the Express app. index.ts imports this same
+// app and calls listen() for local development and normal servers.
+const app = createApp();
+export default app;
