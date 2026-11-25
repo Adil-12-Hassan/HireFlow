@@ -65,4 +65,3 @@ Desktop.ini
 *.njsproj
 
 # Keep source tests, SQL migrations, package-lock.json, and .env.example tracked.
-tests

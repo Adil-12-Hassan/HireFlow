@@ -33,6 +33,14 @@ export async function listJobs(req: Request, res: Response): Promise<void> {
     res.status(200).json(result);
 }
 
+// GET /jobs/mine -> 200, signed in only, all my jobs including drafts
+export async function listMyJobs(req: Request, res: Response): Promise<void> {
+    const userId = requireUserId(req);
+    const { page, limit } = parsePagination(req.query);
+    const result = await jobService.listMyJobs(userId, { page, limit });
+    res.status(200).json(result);
+}
+
 // GET /jobs/:id -> 200, public if open, owner only if draft or closed
 export async function getJob(req: Request, res: Response): Promise<void> {
     const job = await jobService.getJobById(req.user?.id, getParamId(req));

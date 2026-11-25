@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { env } from "../config/env.js";
 import { forbidden } from "../utils/errors.js";
+import { isAllowedOrigin } from "../utils/origins.js";
 
 // CSRF protection for cookie-authenticated writes.
 // A browser always sends an Origin header for a cross-site request.
@@ -21,7 +22,7 @@ export function originCheck(req: Request, _res: Response, next: NextFunction): v
         return next();
     }
 
-    if (origin === env.FRONTEND_URL) {
+    if (isAllowedOrigin(origin, env.ALLOWED_ORIGINS)) {
         return next();
     }
 

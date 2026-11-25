@@ -1,6 +1,7 @@
 import { supabaseAdmin } from "../config/supabase.js";
 import { badRequest, forbidden, internalError, notFound } from "../utils/errors.js";
 import { paginationMeta, supabaseRange } from "../utils/pagination.js";
+import { ilikeOr } from "../utils/search.js";
 import type {
     CreateJobInput,
     JobStatus,
@@ -88,13 +89,31 @@ export async function listOpenJobs(query: { page: number; limit: number; search?
         .order("id", { ascending: false })
         .range(from, to);
 
-    if (search) {
-        const term = search.replace(/[%_]/g, "");
-        builder = builder.or(`title.ilike.%${term}%,description.ilike.%${term}%`);
+    // The term is quoted and escaped, so a comma or bracket in the search box
+    // can not break the filter and cause a 500.
+    const filter = search ? ilikeOr(["title", "description"], search) : null;
+    if (filter) {
+        builder = builder.or(filter);
     }
 
     const { data, error, count } = await builder;
     if (error) throw internalError("Could not load jobs");
+    return { data: (data ?? []) as unknown as JobRow[], meta: paginationMeta(count ?? 0, page, limit) };
+}
+
+// GET /jobs/mine, signed in only. Every job the user owns, any status,
+// so an owner can find drafts and closed jobs again.
+export async function listMyJobs(ownerId: string, query: { page: number; limit: number }) {
+    const { page, limit } = query;
+    const { from, to } = supabaseRange(page, limit);
+    const { data, error, count } = await supabaseAdmin
+        .from("jobs")
+        .select(JOB_FIELDS, { count: "exact" })
+        .eq("owner_id", ownerId)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .range(from, to);
+    if (error) throw internalError("Could not load your jobs");
     return { data: (data ?? []) as unknown as JobRow[], meta: paginationMeta(count ?? 0, page, limit) };
 }
 

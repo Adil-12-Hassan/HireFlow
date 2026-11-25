@@ -5,8 +5,18 @@ type RetryConfig = InternalAxiosRequestConfig & {
     _skipAuthRefresh?: boolean;
 };
 
+// In development the API runs on localhost. A production build must set
+// VITE_API_URL, otherwise requests would go to the frontend's own host.
+const API_URL = (import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? "http://localhost:5000" : ""))
+    .trim()
+    .replace(/\/+$/, "");
+
+if (!API_URL && !import.meta.env.DEV) {
+    console.error("VITE_API_URL is not set. Set it to your API address and rebuild the frontend.");
+}
+
 export const api: AxiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:5000",
+    baseURL: API_URL,
     withCredentials: true,
     headers: { "Content-Type": "application/json" },
 });
@@ -61,10 +71,28 @@ api.interceptors.response.use(
     },
 );
 
+// Thrown when the server accepted a login but the browser did not keep the session.
+export class SessionError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "SessionError";
+    }
+}
+
 export function getErrorMessage(error: unknown): string {
+    if (error instanceof SessionError) return error.message;
     if (axios.isAxiosError(error)) {
         const data = error.response?.data as { error?: string } | undefined;
         if (data?.error) return data.error;
+        // No response at all: the server is down, offline, or CORS blocked the call.
+        if (!error.response) {
+            return "Cannot reach the server. Check your internet connection and try again.";
+        }
+        // A response that is not our JSON error, for example a platform error page.
+        const status = error.response.status;
+        if (status === 429) return "Too many requests, please try again later.";
+        if (status >= 500) return "The server had a problem. Please try again in a moment.";
+        return `The request was refused (HTTP ${status}).`;
     }
     return "Something went wrong";
 }

@@ -17,6 +17,12 @@ export async function listJobs(params?: { page?: number; limit?: number; search?
     return res.data as Paginated<Job>;
 }
 
+// Every job I own, drafts and closed jobs included. Needs sign in.
+export async function listMyJobs(params?: { page?: number; limit?: number }): Promise<Paginated<Job>> {
+    const res = await api.get("/jobs/mine", { params });
+    return res.data as Paginated<Job>;
+}
+
 export async function getJob(id: string): Promise<Job> {
     const res = await api.get(`/jobs/${id}`);
     return res.data as Job;

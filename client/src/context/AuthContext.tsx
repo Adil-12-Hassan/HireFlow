@@ -2,6 +2,7 @@ import { createContext, useContext, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as authApi from "../api/auth";
 import type { Me } from "../api/auth";
+import { SessionError } from "../api/client";
 
 type AuthContextValue = {
     user: Me | null;
@@ -31,6 +32,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function login(data: { email: string; password: string }) {
         await authApi.login(data);
         await queryClient.refetchQueries({ queryKey: ["me"] });
+        // The server said yes, but if /auth/me still has no user, the browser did
+        // not keep the session cookie. Say so, instead of silently bouncing the
+        // user back to the sign-in page.
+        if (!queryClient.getQueryData(["me"])) {
+            throw new SessionError(
+                "Signed in, but your browser did not keep the session. Allow cookies for this site (or turn off cross-site tracking protection) and try again.",
+            );
+        }
     }
 
     async function logout() {

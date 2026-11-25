@@ -32,6 +32,8 @@ export const authLimiter = rateLimit({
 export const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 5,
+    // Only failed logins count, so normal sign-ins never lock a user out.
+    skipSuccessfulRequests: true,
     standardHeaders: true,
     legacyHeaders: false,
     handler: tooMany("Too many login attempts, please try again in 15 minutes"),
